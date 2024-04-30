@@ -2,7 +2,7 @@ import java.awt.Color;
 
 import javax.swing.*;
 
-public class ReceptionistInterface extends JFrame {
+public class ManagerInterface extends JFrame {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Menu do Recepcionista");
         JPanel panel1 = new JPanel();
@@ -13,6 +13,8 @@ public class ReceptionistInterface extends JFrame {
         JButton button2 = new JButton("Check in");// creating instance of JButton
         JButton button3 = new JButton("Check out");// creating instance of JButton
         JButton button4 = new JButton("Reserva");// creating instance of JButton
+        JButton button5 = new JButton("Cadastro Funcionário");// creating instance of JButton
+        JButton button6 = new JButton("Alterar Cobrança");// creating instance of JButton
 
         JLabel output = new JLabel("Aguardando!");
 
@@ -28,6 +30,12 @@ public class ReceptionistInterface extends JFrame {
         button4.setBounds(450, 50, 150, 40);// x axis, y axis, width, height
         button4.addActionListener(e -> output.setText("Reserva realizada!"));
 
+        button5.setBounds(0, 100, 300, 40);// x axis, y axis, width, height
+        button5.addActionListener(e -> output.setText("Funcionario Cadastrado"));
+
+        button6.setBounds(300, 100, 300, 40);// x axis, y axis, width, height
+        button6.addActionListener(e -> output.setText("Cobrança Alterada"));
+
         panel1.setBackground(Color.LIGHT_GRAY);
 
         panel1.add(label1);
@@ -35,6 +43,8 @@ public class ReceptionistInterface extends JFrame {
         frame.add(button2);
         frame.add(button3);
         frame.add(button4);
+        frame.add(button5);
+        frame.add(button6);
 
         frame.add(panel1);
 
