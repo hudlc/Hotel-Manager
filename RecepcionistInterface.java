@@ -1,3 +1,8 @@
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import javax.swing.JOptionPane;
+
 import javax.swing.*;
 
 public class RecepcionistInterface extends JFrame {
@@ -37,7 +42,13 @@ public class RecepcionistInterface extends JFrame {
     int windowWidth;
     int windowHeight;
 
-    RecepcionistInterface() {
+    ArrayList<Client> clients;
+    ArrayList<Reservation> reservations;
+    ArrayList<Room> rooms;
+    Receptionist receptionist;
+
+    RecepcionistInterface(ArrayList<Client> clients, ArrayList<Reservation> reservations, ArrayList<Room> rooms,
+            Receptionist receptionist) {
 
         windowWidth = 500;
         windowHeight = 800;
@@ -180,6 +191,11 @@ public class RecepcionistInterface extends JFrame {
         makeRegisterInvisible();
         makeReservationInvisible();
 
+        this.clients = clients;
+        this.reservations = reservations;
+        this.receptionist = receptionist;
+        this.rooms = rooms;
+
     }
 
     public void makeRegisterInvisible() {
@@ -283,20 +299,65 @@ public class RecepcionistInterface extends JFrame {
     public void confirmRegister() {
         String name = clientNameInput.getText();
         String cpf = clientCPFInput.getText();
+        boolean unique = true;
 
-        output.setText("Cadastrado " + name + " de CPF " + cpf);
+        for (Client client : clients) {
+            if (Integer.valueOf(cpf) == client.getId()) {
+                unique = false;
+            }
+        }
+
+        if (unique) {
+            clients.add(new Client(name, Integer.valueOf(cpf)));
+            output.setText("Cadastrado " + name + " de CPF " + cpf);
+
+        } else {
+            output.setText("CPF já cadastrado");
+        }
+
     }
 
     public void confirmCheckIn() {
         String quarto = checkInRoomInput.getText();
+        boolean foundRoom = false;
 
-        output.setText("Check In do quarto " + quarto + " realizado!");
+        for (Reservation reservation : reservations) {
+            if (reservation.getRoom().getNumber() == Integer.valueOf(quarto)) {
+                foundRoom = true;
+            }
+
+        }
+
+        if (foundRoom) {
+            output.setText("Check In do quarto " + quarto + " realizado!");
+
+        }
+
+        else {
+            output.setText("Não foi possível realizar o Check In!");
+        }
+
     }
 
     public void confirmCheckOut() {
-        String quarto = checkOutRoomInput.getText();
+        String quarto = checkInRoomInput.getText();
+        boolean foundRoom = false;
 
-        output.setText("Check Out do quarto " + quarto + " realizado!");
+        for (Reservation reservation : reservations) {
+            if (reservation.getRoom().getNumber() == Integer.valueOf(quarto)) {
+                foundRoom = true;
+            }
+
+        }
+
+        if (foundRoom) {
+            output.setText("Check Out do quarto " + quarto + " realizado!");
+
+        }
+
+        else {
+            output.setText("Não foi possível realizar o Check Out!");
+        }
     }
 
     public void confirmReservation() {
@@ -304,12 +365,47 @@ public class RecepcionistInterface extends JFrame {
         String checkin = reservationCheckInInput.getText();
         String checkout = reservationCheckOutInput.getText();
         String room = reservationRoomInput.getText();
+        Room correctRoom = null;
 
-        output.setText("Reserva de " + checkin + " a " + checkout + " do quarto " + room + " no cpf " + CPF);
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+
+        try {
+
+            Date cehckinDate = format.parse(checkin);
+            Date cehckoutDate = format.parse(checkout);
+            int CPFInt = Integer.parseInt(CPF);
+            int roomInt = Integer.parseInt(room);
+
+            for (Room roomIndv : rooms) {
+                if (roomIndv.getNumber() == roomInt) {
+                    correctRoom = roomIndv;
+                }
+            }
+
+            for (Client client : clients) {
+                if (client.getId() == CPFInt && correctRoom != null) {
+                    reservations.add(new Reservation(client, receptionist, correctRoom));
+                    output.setText(
+                            "Reserva de " + checkin + " a " + checkout + " do quarto " + room + " no cpf " + CPF);
+                    break;
+                } else {
+                    output.setText("Reserva inválida - Cliente não cadastrado \n Ou Quarto inválido");
+                }
+
+            }
+
+        } catch (Exception e) {
+            output.setText("Reserva inválida");
+        }
+
     }
 
     public static void main(String[] args) {
-        RecepcionistInterface interface2 = new RecepcionistInterface();
+        // RecepcionistInterface interface2 = new RecepcionistInterface();
+    }
+
+    public static void infoBox(String infoMessage, String titleBar) {
+        JOptionPane.showMessageDialog(null, infoMessage, "InfoBox: " + titleBar, JOptionPane.INFORMATION_MESSAGE);
     }
 
 }

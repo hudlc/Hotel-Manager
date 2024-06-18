@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import javax.swing.*;
 
 public class HousekeeperInterface extends JFrame {
@@ -17,7 +19,10 @@ public class HousekeeperInterface extends JFrame {
     int windowWidth;
     int windowHeight;
 
-    HousekeeperInterface() {
+    ArrayList<Room> rooms;
+    ArrayList<Reservation> reservations;
+
+    HousekeeperInterface(ArrayList<Reservation> reservations) {
 
         windowWidth = 500;
         windowHeight = 800;
@@ -30,6 +35,8 @@ public class HousekeeperInterface extends JFrame {
         confirm = new JButton("Cobrar");
         inputRoom = new JTextField();
         inputValue = new JTextField();
+
+        this.reservations = reservations;
 
         title.setBounds(180, 10, 200, 30);
         inputRoomLabel.setBounds(10, 45, 200, 30);
@@ -60,14 +67,25 @@ public class HousekeeperInterface extends JFrame {
     }
 
     public void confirmCharge() {
-        String room = inputRoom.getText();
+        String roomNumber = inputRoom.getText();
         String value = inputValue.getText();
 
-        output.setText("Cobrado " + value + " do quarto " + room + "!");
+        for (Reservation reservation : reservations) {
+            if (Integer.toString(reservation.getRoom().getNumber()).equals(roomNumber)) {
+                output.setText("Cobrança realizada!");
+
+            } else {
+                System.out.println(reservation.getRoom().getNumber());
+                System.out.println(roomNumber);
+                output.setText("Erro");
+            }
+        }
+
+        // output.setText("Cobrado " + value + " do quarto " + roomNumber + "!");
     }
 
     public static void main(String[] args) {
-        HousekeeperInterface interface1 = new HousekeeperInterface();
+        // HousekeeperInterface interface1 = new HousekeeperInterface();
     }
 
 }

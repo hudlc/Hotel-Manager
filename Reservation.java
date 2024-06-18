@@ -49,6 +49,10 @@ public class Reservation {
         this.expenses = this.expenses + charge;
     }
 
+    public void setExpenses(int newValue) {
+        this.expenses = newValue;
+    }
+
     public String getDetails() {
 
         String details = "Reserva: \nClient:" + getClient().getName() + " \nRoom:" + getRoom().getNumber()

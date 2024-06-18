@@ -1,3 +1,13 @@
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.awt.FlowLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JOptionPane;
+
 import javax.swing.*;
 
 public class ManagerInterface extends JFrame {
@@ -52,7 +62,15 @@ public class ManagerInterface extends JFrame {
     int windowWidth;
     int windowHeight;
 
-    ManagerInterface() {
+    ArrayList<Client> clients;
+    ArrayList<Reservation> reservations;
+    ArrayList<Room> rooms;
+    ArrayList<Housekeeper> housekeepers;
+    ArrayList<Receptionist> receptionists;
+    Receptionist receptionist;
+
+    ManagerInterface(ArrayList<Client> clients, ArrayList<Reservation> reservations, ArrayList<Room> rooms,
+            Receptionist receptionist, ArrayList<Receptionist> receptionists, ArrayList<Housekeeper> housekeepers) {
 
         windowWidth = 500;
         windowHeight = 800;
@@ -109,7 +127,7 @@ public class ManagerInterface extends JFrame {
         changeChargeValueLabel.setBounds(10, 280, 200, 100);
 
         // Buttons //
-        register = new JButton("Registrar");
+        register = new JButton("Registrar Cliente");
         register.setBounds(0, 50, 250, 40);
         register.addActionListener(e -> registerMenu());
 
@@ -125,7 +143,7 @@ public class ManagerInterface extends JFrame {
         reservation.setBounds(250, 90, 250, 40);
         reservation.addActionListener(e -> reservationMenu());
 
-        registerEmployee = new JButton("Reg. Empregado");
+        registerEmployee = new JButton("Registrar Empregado");
         registerEmployee.setBounds(250, 130, 250, 40);
         registerEmployee.addActionListener(e -> employeeRegisterMenu());
 
@@ -264,6 +282,11 @@ public class ManagerInterface extends JFrame {
         makeReservationInvisible();
         makeRegisterEmployeeInvisible();
         makeChangeChargeInvisible();
+
+        this.clients = clients;
+        this.receptionist = receptionist;
+        this.receptionists = receptionists;
+        this.housekeepers = housekeepers;
 
     }
 
@@ -424,13 +447,27 @@ public class ManagerInterface extends JFrame {
         makeCheckOutInvisible();
         makeReservationInvisible();
         makeRegisterInvisible();
+        makeRegisterEmployeeInvisible();
     }
 
     public void confirmRegister() {
         String name = clientNameInput.getText();
         String cpf = clientCPFInput.getText();
+        boolean unique = true;
 
-        output.setText("Cadastrado " + name + " de CPF " + cpf);
+        for (Client client : clients) {
+            if (Integer.valueOf(cpf) == client.getId()) {
+                unique = false;
+            }
+        }
+
+        if (unique) {
+            clients.add(new Client(name, Integer.valueOf(cpf)));
+            output.setText("Cadastrado " + name + " de CPF " + cpf);
+
+        } else {
+            output.setText("CPF já cadastrado");
+        }
     }
 
     public void confirmCheckIn() {
@@ -450,8 +487,38 @@ public class ManagerInterface extends JFrame {
         String checkin = reservationCheckInInput.getText();
         String checkout = reservationCheckOutInput.getText();
         String room = reservationRoomInput.getText();
+        Room correctRoom = null;
 
-        output.setText("Reserva de " + checkin + " a " + checkout + " do quarto " + room + " no cpf " + CPF);
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+
+        try {
+
+            Date cehckinDate = format.parse(checkin);
+            Date cehckoutDate = format.parse(checkout);
+            int CPFInt = Integer.parseInt(CPF);
+            int roomInt = Integer.parseInt(room);
+
+            for (Room roomIndv : rooms) {
+                if (roomIndv.getNumber() == roomInt) {
+                    correctRoom = roomIndv;
+                }
+            }
+
+            for (Client client : clients) {
+                if (client.getId() == CPFInt && correctRoom != null) {
+                    reservations.add(new Reservation(client, receptionist, correctRoom));
+                    output.setText(
+                            "Reserva de " + checkin + " a " + checkout + " do quarto " + room + " no cpf " + CPF);
+                    break;
+                } else {
+                    output.setText("Reserva inválida - Cliente não cadastrado \n Ou Quarto inválido");
+                }
+
+            }
+
+        } catch (Exception e) {
+            output.setText("Reserva inválida");
+        }
     }
 
     public void confirmRegisterEmployee() {
@@ -459,18 +526,43 @@ public class ManagerInterface extends JFrame {
         String name = employeeRegisterNameInput.getText();
         String occupation = occupationsComboBoxInput.getSelectedItem().toString();
 
-        output.setText("Cadastrado " + name + " de CPF " + CPF + " como " + occupation);
+        try {
+            if (occupation.equals("Recepcionista")) {
+                receptionists.add(new Receptionist(name, Integer.valueOf(CPF)));
+                output.setText("Recepcionista: " + name + " Cadastrada");
+            } else if (occupation.equals("Camareira")) {
+                housekeepers.add(new Housekeeper(name, Integer.valueOf(CPF)));
+                output.setText("Camareira" + name + " Cadastrada");
+            } else if (occupation.equals("Administrador")) {
+                output.setText("Administrador" + name + " Cadastrada");
+            }
+        } catch (Exception e) {
+            output.setText("Cadastro Inválido!");
+        }
     }
 
     public void confirmChangeChargeRoom() {
-        String room = changeChargeRoomInput.getText();
+        String roomNumber = changeChargeRoomInput.getText();
         String value = changeChargeValueInput.getText();
 
-        output.setText("Alterada a cobrança do quarto " + room + " para " + value);
-    }
+        try {
+            for (Reservation reservation : reservations) {
+                if (reservation.getRoom().getNumber() == Integer.parseInt(roomNumber)) {
+                    reservation.setExpenses(Integer.parseInt(value));
+                    output.setText("Valor do quarto " + roomNumber + " alterado para " + value);
+                    break;
+                } else {
+                    output.setText("Reserva não encontrada");
+                }
 
-    public static void main(String[] args) {
-        ManagerInterface interface2 = new ManagerInterface();
+            }
+
+        } catch (Exception e) {
+            output.setText("Alteração não realizada");
+
+            // TODO: handle exception
+        }
+
     }
 
 }
